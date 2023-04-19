@@ -96,7 +96,35 @@ class Rect:
                 else:
                     line_end_n -= line_speed
 
+                pygame.display.update()
+    
+
+    def move_rect(self, rect, x, y, valor):
+        """Funcao responsavel por mover o retangulo de um ponto a outro"""
+        run = True
+        vel = 1
+        while run:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    run = False
+            if rect.x <= x:
+                if rect.y <= y:
+                    run = False
+                pygame.draw.rect(WINDOW, WHITE, (rect.x, rect.y, self.width, self.height), 2)
+                rect.y -= vel
+                rect = pygame.draw.rect(WINDOW, BLACK, (rect.x, rect.y,
+                    self.width, self.height), 2)
+
+            else:
+                pygame.draw.rect(WINDOW, WHITE, (rect.x, rect.y, self.width, self.height), 2)
+                rect.x -= vel
+                rect = pygame.draw.rect(WINDOW, BLACK, (rect.x, rect.y,
+                    self.width, self.height), 2)
             pygame.display.update()
+            
+    
+        return rect
+
 
     def draw(self, node,  first):
         node_first = first
@@ -111,6 +139,9 @@ class Rect:
             self.draw_line(node.rect, 0, BLACK)
             self.draw_line(node.rect, 1, BLACK)
             
+            number = GAME_FONT.render(str(self.valor), True, BLACK)
+            WINDOW.blit(number, (rect.centerx - number.get_width() // 2,
+                rect.centery - number.get_height() // 2))
 
         elif node.next is None:
             print("ESTAMOS COLOCANDO UM ELEMENTO NO FIM DA LINHA")
@@ -123,18 +154,25 @@ class Rect:
 
             rect_x = RECT_LINE_X - self.width // 2
             rect_y = (RECT_LINE_Y - self.height // 2) + CONST_Y
+
+            # Envia o deseno do primeiro anterior para apgar sua linha esquerda
+            self.draw_line(node.next.rect, 0, WHITE)
             rect = pygame.draw.rect(WINDOW, BLACK, (rect_x, rect_y,
                 self.width, self.height), 2)
+            pygame.display.update()
             
-            node.rect = rect # Salva o desenho
-            self.draw_line(node.next.rect, 0, WHITE) # Envia o desenho do primeiro nó anterior para apagar sua linha esquerda
+            # Posicao x que o objeto deve ir, que é baseado onde o primeiro está
+            x = (node.next.rect.x - self.width // 2) - (2 * SPACE_RECT)
+            node.rect = self.move_rect(rect, x , rect_y - CONST_Y,
+                    self.valor)
+            number = GAME_FONT.render(str(self.valor), True, BLACK)
+            WINDOW.blit(number, (node.rect.centerx - number.get_width() // 2,
+                node.rect.centery - number.get_height() // 2))
+            self.draw_line(node.rect, 0, BLACK)
+            self.draw_line(node.rect, 1, BLACK)
+            pygame.display.update()
 
-         
-        number = GAME_FONT.render(str(self.valor), True, BLACK)
-        WINDOW.blit(number, (rect.centerx - number.get_width() // 2,
-            rect.centery - number.get_height() // 2))
-        
-       
+
         pygame.display.update()
         return True
 
@@ -182,6 +220,7 @@ class List:
                 node.next = self.first
                 self.first.back = node
             self.first = node
+            print("adicionou no primeiro")
         else:
             node.next = aux
             node.back = aux.back
