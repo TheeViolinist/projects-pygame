@@ -25,6 +25,7 @@ class Rect:
         self.valor = valor
         self.width = 100
         self.height = 50
+    
 
     def draw_line(self, rect, di, color):
         """Funcao responsavel por desenhar uma linha, caso queremos apagar
@@ -36,20 +37,24 @@ class Rect:
 
         line_speed = 0.1
         run = True
+        
+        # Desenha a seta que aponta para trás
         if di == 0:
-            line_start_back = (rect.centerx-self.width//2) - const.SPACE_RECT
-            line_end_b = line_start_back
+            line_start_back = (rect.centerx-self.width//2)
+                line_end_b = line_start_back -(const.SPACE_RECT - ARROW_WIDTH)
+            line_end = line_start_back
 
             while run:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         run = False
                 line = pygame.draw.line(WINDOW, color, (line_start_back, rect.centery),
-                        (line_end_b, rect.centery), const.LINE_WIDTH)
-                if rect.colliderect(line):
+                        (line_end, rect.centery), const.LINE_WIDTH)
+                if line_end <= line_end_b:
+                                       
                     run = False
                 else:
-                    line_end_b += line_speed
+                    line_end -= line_speed
                 pygame.display.update()
             
         if di == 1:

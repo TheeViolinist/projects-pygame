@@ -6,3 +6,4 @@ RECT_LINE_X, RECT_LINE_Y = WIDTH / 2, HEIGHT / 2  # Linha principal da lista
 SPACE_RECT = 50  # Espaçamento entre retangulos
 LINE_WIDTH = 5
 CONST_Y = 100  # Constante abaixo do eixo y principal
+ARROW_WIDTH = 10

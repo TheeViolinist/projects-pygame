@@ -16,8 +16,8 @@ background_color = (255, 255, 255)
 # Set the color of the arrow
 arrow_color = (255, 0, 0)
 
-arrow = pygame.draw.polygon(screen, (255, 255, 255), ((200, 200), (200, 300), (300, 150), (200, 0), (200, 100)))
-
+#arrow = pygame.draw.polygon(screen, (255, 255, 255), ((200, 200), (200, 300), (300, 150), (200, 0), (200, 100)))
+arrow = pygame.draw.polygon(screen, (255, 255, 255), ((10, 10), (10, 20), (20, 10), (10, 0), (10, 5)))
 
 # Update the screen
 pygame.display.update()
