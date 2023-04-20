@@ -93,10 +93,7 @@ class Rect:
 
             else:
                 pygame.draw.rect(WINDOW, const.WHITE, (rect.x, rect.y, self.width, self.height), 2)
-                if r == 0:
-                    rect.x -= vel
-                else:
-                    rect.x += vel
+                rect.x -= vel
                 rect = pygame.draw.rect(WINDOW, const.BLACK, (rect.x, rect.y,
                     self.width, self.height), 2)
             pygame.display.update()
@@ -138,8 +135,6 @@ class Rect:
             # Vamos agora calcular a posicao x que o objeto deve ir
             # A posicao x é referente a posicao do ultimo no
             x = (node.back.rect.x + self.width // 2) + (2 * const.SPACE_RECT)
-            print(x)
-            print(node.back.rect.x)
             node.rect = self.move_rect(rect, x, rect_y - const.CONST_Y, 1)
             number = GAME_FONT.render(str(self.valor), True, const.BLACK)
             # WINDOW.blit(number, )
@@ -198,6 +193,7 @@ class List:
         self.first = None
     
     def insert_end(self, value):
+        """Funcao responsável por inserir o elemento no fim da lista"""
         node = Node(value)
         
         node.next = None
@@ -218,20 +214,11 @@ class List:
         rect.draw(node)
 
 
-    def insert(self, value, pos):
-        """Função responsável por inserir elemento numa posicao >= 1"""
+    def insert_first_mid(self, value, pos):
+        """Função responsável por inserir elemento numa posicao >= 1 que nao seja final"""
         node = Node(value)
-        if not self.quant:
-            if pos == 1:
-                pass
-            else:
-                print("Digite um valor validod e posicao\n")
-                return -1
-        elif pos < 0 or pos > self.quant:
-            print(f'Digite um valor valido de posicao\n')
-            return -1
-        
-        pos -= 1 # Ajeita a posicao para ficar de 0 ate n - 1 
+
+        pos -= 1 # Ajeita a posicao para ficar de 0 ate n - 1
         i = 0
         aux = self.first
         while i < pos:
@@ -255,6 +242,16 @@ class List:
         self.quant += 1
         rect = Rect(value) 
         rect.draw(node)
+
+    def insert(self, value, pos):
+        """Funcao responsavel por manejar a introducao de nos na lista"""
+        if  pos > 0 and pos <= self.quant:
+            self.insert_first_mid(value, pos)
+        elif pos == self.quant + 1:
+            self.insert_end(value)
+        else:
+            print(f'Digite um valor valido de posicao\n')
+            return -1
 
 
     def list_print(self):
@@ -283,10 +280,7 @@ def main():
         if choice.rstrip() == "i":
             number_insert = int(input("Digite o valor para inserir: "))
             number_position = int(input("Digite uma posicao: "))
-            if number_position == rectangles.quant + 1:
-                rectangles.insert_end(number_insert)
-            else:
-                rectangles.insert(number_insert, number_position)
+            rectangles.insert(number_insert, number_position)
             rectangles.list_print()
         elif choice.rstrip() == 's':
             run = False
