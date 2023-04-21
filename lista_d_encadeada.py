@@ -25,57 +25,83 @@ class Rect:
         self.valor = valor
         self.width = 100
         self.height = 50
-    
 
-    def draw_line(self, rect, di, color):
+
+    def draw_line(self, rect, is_next, color):
         """Funcao responsavel por desenhar uma linha, caso queremos apagar
         uma linha so enviar color como white ou cor do background ou
         apenas desennhar uma seta com outra determinada cor.
         A ideia então, é inicializar a seta na lateral extrema, distanciado
         por um valor que determina o espaço entre os retangulos
-        Entao vamos animar a seta até enconstar no retangulo"""
+        O espaço entre retangulos é uma constante e temos que considerar o tamanho
+        da ponta da flecha"""
 
         line_speed = 0.1
         run = True
         
-        # Desenha a seta que aponta para trás
-        if di == 0:
+        # Desenha a seta que aponta para o back
+        # Quando termina de desenhar a reta, cria a ponta da seta
+        if not is_next:
             line_start_back = (rect.centerx-self.width//2)
-                line_end_b = line_start_back -(const.SPACE_RECT - ARROW_WIDTH)
+            line_end_b = line_start_back - const.SPACE_RECT - const.ARROW_WIDTH
             line_end = line_start_back
+            
+            # Vamos posicionar a seta back
+            # no quarto superior 
+            position_y = rect.centery - (self.height // 4)
 
             while run:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         run = False
-                line = pygame.draw.line(WINDOW, color, (line_start_back, rect.centery),
-                        (line_end, rect.centery), const.LINE_WIDTH)
+                
+                line = pygame.draw.line(WINDOW, color, (line_start_back, position_y),
+                        (line_end, position_y), const.LINE_WIDTH)
+                
                 if line_end <= line_end_b:
-                                       
+                    arrow_points = [(line_end, position_y),
+                            (line_end, position_y + const.ARROW_WIDTH),
+                        (line_end - const.ARROW_WIDTH, position_y),
+                        (line_end, position_y - const.ARROW_WIDTH),
+                        (line_end, position_y)] 
+                    pygame.draw.polygon(WINDOW, color, arrow_points)
                     run = False
                 else:
                     line_end -= line_speed
+                
                 pygame.display.update()
             
-        if di == 1:
-            line_start_next = (rect.centerx+self.width//2) + const.SPACE_RECT
-            line_end_n = line_start_next
-
+        if is_next:
+            line_start_next = (rect.centerx+self.width//2)
+            line_end_n = line_start_next + const.SPACE_RECT + const.ARROW_WIDTH
+            line_end = line_start_next
+               
+            # Vamos posicionar a seta do next
+            # no quarto inferior
+            position_y = rect.centery + (self.height // 4)
             while run:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         run = False
-                line = pygame.draw.line(WINDOW, color, (line_start_next, rect.centery),
-                        (line_end_n, rect.centery), const.LINE_WIDTH)
-                if rect.colliderect(line):
+                line = pygame.draw.line(WINDOW, color, (line_start_next, position_y),
+                        (line_end, position_y), const.LINE_WIDTH)
+                
+                if line_end >= line_end_n:
+                    arrow_points = [(line_end, position_y),
+                            (line_end, position_y + const.ARROW_WIDTH),
+                        (line_end + const.ARROW_WIDTH, position_y),
+                        (line_end, position_y - const.ARROW_WIDTH),
+                        (line_end, position_y)] 
+                    pygame.draw.polygon(WINDOW, color, arrow_points)
                     run = False
+                
                 else:
-                    line_end_n -= line_speed
+                    line_end += line_speed
 
                 pygame.display.update()
 
 
-    def move_rect(self, rect, x, y, r):
+    def move_rect(self, rect, x, y, is_end):
         """Funcao responsavel por mover o retangulo de um ponto a outro
         A ideia basica é mover primeiro na posicao x e depois para a posicao y
         Na posicao x, devemos primeiramente desenhar o mesmo retangulo em
@@ -83,27 +109,50 @@ class Rect:
         para simular a animacao, após isso a mesma coisa com o valor de y"""
         run = True
         vel = 1
-        while run:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    run = False
-            if rect.x <= x:
-                if rect.y <= y:
-                    run = False
-                pygame.draw.rect(WINDOW, const.WHITE, (rect.x, rect.y, self.width, self.height), 2)
+        # Adiciona no inicio da lista
+
+        if not is_end:
+            while run:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        run = False
+                if rect.x <= x:
+                    if rect.y <= y:
+                        run = False
+                    pygame.draw.rect(WINDOW, const.WHITE, (rect.x, rect.y, self.width, self.height), 2)
                 
-                rect.y -= vel
-                rect = pygame.draw.rect(WINDOW, const.BLACK, (rect.x, rect.y,
-                    self.width, self.height), 2)
+                    rect.y -= vel
+                    rect = pygame.draw.rect(WINDOW, const.BLACK, (rect.x, rect.y,
+                        self.width, self.height), 2)
 
-            else:
-                pygame.draw.rect(WINDOW, const.WHITE, (rect.x, rect.y, self.width, self.height), 2)
-                rect.x -= vel
-                rect = pygame.draw.rect(WINDOW, const.BLACK, (rect.x, rect.y,
-                    self.width, self.height), 2)
-            pygame.display.update()
+                else:
+                    pygame.draw.rect(WINDOW, const.WHITE, (rect.x, rect.y, self.width, self.height), 2)
+                    rect.x -= vel
+                    rect = pygame.draw.rect(WINDOW, const.BLACK, (rect.x, rect.y,
+                        self.width, self.height), 2)
+                pygame.display.update()
+        if is_end:
+            while run:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        run = False
+                if rect.x >= x:
+                    if rect.y <= y:
+                        run = False
+                    pygame.draw.rect(WINDOW, const.WHITE, (rect.x, rect.y, self.width, self.height), 2)
+
+                    rect.y -= vel
+                    rect = pygame.draw.rect(WINDOW, const.BLACK, (rect.x, rect.y,
+                        self.width, self.height), 2)
+                else:
+                    pygame.draw.rect(WINDOW, const.WHITE, (rect.x, rect.y, self.width, self.height), 2)
+                    rect.x += vel
+                    rect = pygame.draw.rect(WINDOW, const.BLACK, (rect.x, rect.y,
+                        self.width, self.height), 2)
+                pygame.display.update()
+
         return rect
-
+    
 
     def draw(self, node):
         """Funcao responsável por manejar todo o desenho do retangulo"""
@@ -118,8 +167,8 @@ class Rect:
             rect = pygame.draw.rect(WINDOW, const.BLACK, (rect_x, rect_y,
                 self.width, self.height), 2)
             node.rect = rect
-            self.draw_line(node.rect, 0, const.BLACK)
-            self.draw_line(node.rect, 1, const.BLACK)
+            self.draw_line(node.rect, False, const.BLACK)
+            self.draw_line(node.rect, True, const.BLACK)
             
             number = GAME_FONT.render(str(self.valor), True, const.BLACK)
             WINDOW.blit(number, (rect.centerx - number.get_width() // 2,
@@ -129,8 +178,8 @@ class Rect:
             "O spaw inicial é o mesmo que nos outros, então podemos fazer"
             rect_x = const.RECT_LINE_X - self.width // 2
             rect_y = (const.RECT_LINE_Y - self.height // 2) + const.CONST_Y
-            print("entrou aqui")
-            "Vamos agora apagar a linha direita do ultimo elemento anterior"
+            
+            "Vamos agora apagar o next do ultimo elemento anterior"
             self.draw_line(node.back.rect, 1, const.WHITE)
             "Desenhando nosso retangulo"
             rect = pygame.draw.rect(WINDOW, const.BLACK, (rect_x, rect_y,
@@ -139,10 +188,19 @@ class Rect:
 
             # Vamos agora calcular a posicao x que o objeto deve ir
             # A posicao x é referente a posicao do ultimo no
-            x = (node.back.rect.x + self.width // 2) + (2 * const.SPACE_RECT)
+            x = (node.back.rect.x + self.width // 2) + (2 * const.SPACE_RECT) + (2 * const.ARROW_WIDTH)
             node.rect = self.move_rect(rect, x, rect_y - const.CONST_Y, 1)
             number = GAME_FONT.render(str(self.valor), True, const.BLACK)
-            # WINDOW.blit(number, )
+
+            WINDOW.blit(number, (node.rect.centerx - number.get_width() // 2, node.rect.centery - number.get_height() // 2))
+
+            # Vamos agora desenhar o next do ultimo elemento anterior
+            self.draw_line(node.back.rect, True, const.BLACK)
+            # Vamos desenhar o back do meu no atual e o next
+            self.draw_line(node.rect, False, const.BLACK)
+            self.draw_line(node.rect, True, const.BLACK)
+
+
         elif node.back is None:
             """Para adicionar no primeiro elemento
             iremos spawnar o objeto abaixo da linha principal
@@ -159,22 +217,25 @@ class Rect:
             rect_y = (const.RECT_LINE_Y - self.height // 2) + const.CONST_Y
 
             # Envia o deseno do primeiro anterior para apgar sua linha esquerda
-            self.draw_line(node.next.rect, 0, const.WHITE)
+            self.draw_line(node.next.rect, False, const.WHITE)
             # Desenha o retangulo
             rect = pygame.draw.rect(WINDOW, const.BLACK, (rect_x, rect_y,
                 self.width, self.height), 2)
             pygame.display.update()
             
             # Posicao x que o objeto deve ir, que é baseado onde o primeiro está
-            x = (node.next.rect.x - self.width // 2) - (2 * const.SPACE_RECT)
-            node.rect = self.move_rect(rect, x , rect_y - const.CONST_Y, 0)
+            x = (node.next.rect.x - self.width // 2) - (2 * const.SPACE_RECT) - (2*const.ARROW_WIDTH)
+            node.rect = self.move_rect(rect, x , rect_y - const.CONST_Y, False)
 
             number = GAME_FONT.render(str(self.valor), True, const.BLACK)
             WINDOW.blit(number, (node.rect.centerx - number.get_width() // 2,
                 node.rect.centery - number.get_height() // 2))
 
-            self.draw_line(node.rect, 0, const.BLACK)
-            self.draw_line(node.rect, 1, const.BLACK)
+            self.draw_line(node.rect, False, const.BLACK)
+            self.draw_line(node.rect, True, const.BLACK)
+
+            # Devemos desenhar o back do primeiro anterior
+            self.draw_line(node.next.rect, False, const.BLACK)
             pygame.display.update()
 
 
