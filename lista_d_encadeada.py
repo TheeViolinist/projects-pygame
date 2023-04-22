@@ -21,7 +21,7 @@ def fill_screen():
 
 
 def draw_arrow(x, y, color, is_back):
-
+    """Funcao responsável por desenhar a seta da flecha"""
     if is_back:
         arrow_points = [(x, y),
                         (x, y + const.ARROW_WIDTH),
@@ -37,6 +37,12 @@ def draw_arrow(x, y, color, is_back):
         
     pygame.draw.polygon(WINDOW, color, arrow_points)
 
+
+def draw_line_not_an(x_init, y_init, x_end, y_end, color):
+    """Funcao responssavel por desenhar setas sem animação"""
+    line = pygame.draw.line(WINDOW, color, (x_init, y_init),
+                                        (x_end, y_end), const.LINE_WIDTH)
+    return line
 
 class Rect:
     """Classe responsável por desenhar o retangulo
@@ -87,8 +93,8 @@ class Rect:
 
                 pygame.display.update()
 
-        if is_next:
-            line_start_next = (rect.centerx+self.width//2)
+        if is_next:         
+            line_start_next = (rect.centerx +self.width//2)
             line_end_n = line_start_next + const.SPACE_RECT + const.ARROW_WIDTH
             line_end = line_start_next
 
@@ -112,7 +118,7 @@ class Rect:
 
                 pygame.display.update()
 
-        return line
+        
 
     def move_rect(self, rect, x, y, is_end):
         """Funcao responsavel por mover o retangulo de um ponto a outro
@@ -121,35 +127,38 @@ class Rect:
         branco depois mudamos sua posicao x e desenhamos novamente em preto
         para simular a animacao, após isso a mesma coisa com o valor de y"""
         run = True
-        vel = 5
+        vel = 1
         # Adiciona no inicio da lista
-        i = 0
-        position_x = rect.x  # Salvamos para conseguir colocar alem da tela
-
         if not is_end:
             while run:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         run = False
-                if position_x <= x:
+                if rect.x <= x:
                     if rect.y <= y:
                         run = False
-                    pygame.draw.rect(WINDOW, const.WHITE, (position_x, rect.y,
+                    
+                    pygame.draw.rect(WINDOW, const.WHITE, (rect.x, rect.y,
                                                            self.width, self.height), 2)
-
+                    
                     rect.y -= vel
-                    rect = pygame.draw.rect(WINDOW, const.BLACK, (position_x, rect.y,
-                                                                  self.width, self.height), 2)
-
+                    rect.move(rect.x, rect.y) # Usamos a função de move para mover e não bugar
+                    pygame.draw.rect(WINDOW, const.BLACK, (rect.x, rect.y,
+                                                                 self.width, self.height), 2)
+                    
+                
                 else:
-                    pygame.draw.rect(WINDOW, const.WHITE, (position_x, rect.y,
+
+                    pygame.draw.rect(WINDOW, const.WHITE, (rect.x, rect.y,
                                                            self.width, self.height), 2)
 
-                    position_x -= vel
+                    rect.x -= vel
+                    rect.move(rect.x, rect.y)
 
-                    pygame.draw.rect(WINDOW, const.BLACK, (position_x, rect.y,
+                    pygame.draw.rect(WINDOW, const.BLACK, (rect.x, rect.y,
                                                            self.width, self.height), 2)
                 pygame.display.update()
+
         if is_end:
             while run:
                 for event in pygame.event.get():
@@ -162,17 +171,20 @@ class Rect:
                                                            self.width, self.height), 2)
 
                     rect.y -= vel
-                    rect = pygame.draw.rect(WINDOW, const.BLACK, (rect.x, rect.y,
+                    rect.move(rect.x, rect.y)
+                    pygame.draw.rect(WINDOW, const.BLACK, (rect.x, rect.y,
                                                                   self.width, self.height), 2)
                 else:
                     pygame.draw.rect(WINDOW, const.WHITE, (rect.x, rect.y,
                                                            self.width, self.height), 2)
                     rect.x += vel
-                    rect = pygame.draw.rect(WINDOW, const.BLACK, (rect.x, rect.y,
+                    rect.move(rect.x, rect.y)
+                    pygame.draw.rect(WINDOW, const.BLACK, (rect.x, rect.y,
                                                                   self.width, self.height), 2)
                 pygame.display.update()
 
         return rect
+
 
     def draw(self, node):
         """Funcao responsável por manejar todo o desenho do retangulo"""
@@ -182,21 +194,22 @@ class Rect:
             e desenhar o retangulo, salva sua imagem no no
             e depois desenhar as linhas e por fim o numero"""
             rect_x = const.RECT_LINE_X - self.width // 2
-            rect_y = const.RECT_LINE_Y - self.height // 2
+            rect_y = const.RECT_LINE_Y - self.height // 2 + const.CONST_Y
+            
 
             rect = pygame.draw.rect(WINDOW, const.BLACK, (rect_x, rect_y,
                                                           self.width, self.height), 2)
-
+            
+            pygame.display.update()
             """Armazena todos os desenhos
             Desenhhamos a seta do next e back"""
             node.rect = rect
-            node.arrow_back = self.draw_line(node.rect, False, const.BLACK)
+            node.rect = self.move_rect(rect, rect_x, rect_y - const.CONST_Y, 1)
 
-            node.arrow_next = self.draw_line(node.rect, True, const.BLACK)
+            self.draw_line(node.rect, False, const.BLACK)
 
-            number = GAME_FONT.render(str(self.valor), True, const.BLACK)
-            WINDOW.blit(number, (rect.centerx - number.get_width() // 2,
-                                 rect.centery - number.get_height() // 2))
+            self.draw_line(node.rect, True, const.BLACK)
+
 
         elif node.next is None:
             "O spaw inicial é o mesmo que nos outros, então podemos fazer"
@@ -215,19 +228,13 @@ class Rect:
             x = (node.back.rect.x + self.width // 2) + \
                 (2 * const.SPACE_RECT) + (2 * const.ARROW_WIDTH)
             node.rect = self.move_rect(rect, x, rect_y - const.CONST_Y, 1)
-            number = GAME_FONT.render(str(self.valor), True, const.BLACK)
-
-            WINDOW.blit(number, (node.rect.centerx - number.get_width() //
-                        2, node.rect.centery - number.get_height() // 2))
-
             # Vamos agora desenhar o next do ultimo elemento anterior
-            node.back.arrow_next = self.draw_line(
-                node.back.rect, True, const.BLACK)
+            self.draw_line(node.back.rect, True, const.BLACK)
 
             # Vamos desenhar o back do meu no atual e o next
-            node.arrow_back = self.draw_line(node.rect, False, const.BLACK)
+            self.draw_line(node.rect, False, const.BLACK)
 
-            node.arrow_next = self.draw_line(node.rect, True, const.BLACK)
+            self.draw_line(node.rect, True, const.BLACK)
 
         elif node.back is None:
             """Para adicionar no primeiro elemento
@@ -254,22 +261,22 @@ class Rect:
             # Posicao x que o objeto deve ir, que é baseado onde o primeiro está
             x = (node.next.rect.x - self.width // 2) - \
                 (2 * const.SPACE_RECT) - (2*const.ARROW_WIDTH)
-            print(x)
+            print(f'movendo o no com valor: {node.value}')
             node.rect = self.move_rect(rect, x, rect_y - const.CONST_Y, False)
-
-            number = GAME_FONT.render(str(self.valor), True, const.BLACK)
-            WINDOW.blit(number, (node.rect.centerx - number.get_width() // 2,
-                                 node.rect.centery - number.get_height() // 2))
-
+            print(f'valor: {node.value}, posicao x central inicial: {node.rect.centerx}, posicao y central inicial: {node.rect.centery}')
             # Desenhamos o back e o next do meu no atual
-            node.arrow_back = self.draw_line(node.rect, False, const.BLACK)
-            node.arrow_next = self.draw_line(node.rect, True, const.BLACK)
+            self.draw_line(node.rect, False, const.BLACK)
+            self.draw_line(node.rect, True, const.BLACK)
 
             # Devemos desenhar o back do primeiro anterior
-            node.next.arrow_back = self.draw_line(
-                node.next.rect, False, const.BLACK)
+            self.draw_line(node.next.rect, False, const.BLACK)
             pygame.display.update()
 
+        
+        number = GAME_FONT.render(str(self.valor), True, const.BLACK)
+        WINDOW.blit(number, (node.rect.centerx - number.get_width() // 2,
+                    node.rect.centery - number.get_height() // 2))
+        
         pygame.display.update()
         return True
 
@@ -281,8 +288,6 @@ class Node:
         """Cada no é representado por um objeto retangulo, seu valor, desenho das arrow e os ponteiros"""
         self.value = value
         self.rect = None  # Desenho do retangulo associado ao no
-        self.arrow_back = None  # Desenho da arrow que aponta para back
-        self.arrow_next = None  # Desenho da arrow que aponta para o next
         self.next = None
         self.back = None
 
@@ -361,30 +366,45 @@ class List:
             aux = aux.next
 
     def move_nodes(self, x, is_left):
+        """Funcao responslave por mover os nos para direita ou esquerda"""
         aux = self.first
         if is_left:
             x *= -1
 
         while aux is not None:
-            print(aux.value)
+            print(f'valor: {aux.value}, posicao x central apos mover: {aux.rect.centerx}, posicao y central apos mover: {aux.rect.centery}')
             aux.rect.x += x
-            aux.arrow_back.x += x
-            aux.arrow_next.x += x
             aux = aux.next
 
     def draw_nodes(self):
         """Função responsável por desenhar todos os nós de uma unica vez"""
         aux = self.first
-        position_y = aux.rect.centery + (const.HEIGHT_RECT // 4)
+        position_y_up = aux.rect.centery - (const.HEIGHT_RECT // 4)
+        position_y_down = aux.rect.centery + (const.HEIGHT_RECT // 4)
+
+
         while aux is not None:
             """Denhamos todos nas novas posições """
+            #if aux.rect.x <= 0: # Devemos fazer isso porque quando o retangulo está fora da tela o seu tamanho tem q ser redefinido
+            #    aux.rect.width = const.WIDTH_RECT
+            
             pygame.draw.rect(WINDOW, const.BLACK, aux.rect, 2)
             number = GAME_FONT.render(str(aux.value), True, const.BLACK)
             WINDOW.blit(number, (aux.rect.centerx - number.get_width() // 2,
                                  aux.rect.centery - number.get_height() // 2))
-            pygame.draw.rect(WINDOW, const.BLACK,
-                             aux.arrow_back, const.LINE_WIDTH)
-            draw_arrow(aux.arrow_back.left, position_y, const.BLACK, True)
+      
+            """Desenho das setas back e next"""
+            x_init_back = aux.rect.centerx - const.WIDTH_RECT // 2
+            x_end_back = x_init_back  - const.SPACE_RECT - const.ARROW_WIDTH
+            
+            x_init_next = aux.rect.centerx + const.WIDTH_RECT // 2
+            x_end_next = x_init_next+ const.SPACE_RECT + const.ARROW_WIDTH
+
+            new_line = draw_line_not_an(x_init_back, position_y_up, x_end_back, position_y_up, const.BLACK)
+            draw_arrow(new_line.left, position_y_up, const.BLACK, True)
+
+            new_line = draw_line_not_an(x_init_next, position_y_down, x_end_next, position_y_down, const.BLACK)
+            draw_arrow(new_line.right, position_y_down, const.BLACK, False)
             aux = aux.next
 
 
@@ -419,15 +439,15 @@ def main():
                 if left_button_rect.collidepoint(mouse_x, mouse_y):
                     rectangles.move_nodes(vel_window, False)
                     flag_move = True
-                    vel_window = -5
+                    vel_window = -10
 
                 elif right_button_rect.collidepoint(mouse_x, mouse_y):
                     rectangles.move_nodes(vel_window, True)
                     flag_move = True
-                    vel_window = 5
+                    vel_window = 10
         if add == 1:
-            for i in range(5):
-                rectangles.insert(i + 1, 1)
+            for i in range(7):
+                rectangles.insert(i + 1,  rectangles.quant + 1)
             add = 0
 
         if flag_move:

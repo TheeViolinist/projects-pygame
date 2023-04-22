@@ -1,0 +1,1 @@
+O centro do nosso quadrado quando vai para o lado negativo começa de -50 e pula direto para zero
