@@ -1,6 +1,6 @@
 import pygame
 import constants as const
-
+import os
 
 pygame.font.init()  # Inicializa as fontes
 pygame.init()
@@ -14,9 +14,13 @@ GAME_FONT = pygame.font.Font("Assets/arial.ttf", 30)
 WINDOW = pygame.display.set_mode((const.WIDTH, const.HEIGHT))
 pygame.display.set_caption("Lista duplamente encadeada")
 
+BACKGROUND_IMAGE = pygame.image.load(
+        os.path.join('Assets', 'background.jpeg'))
+BACKGROUND = pygame.transform.scale(BACKGROUND_IMAGE, (const.WIDTH, const.HEIGHT))
+COLOR_MIDDLE = BACKGROUND.get_at((const.WIDTH // 2, const.HEIGHT // 2)) # Pega a cor do centro
 
 def fill_screen():
-    WINDOW.fill(const.WHITE)
+    WINDOW.blit(BACKGROUND, (0, 0))
     pygame.display.update()
 
 
@@ -51,8 +55,6 @@ class Rect:
     def __init__(self, valor):
         """Inicialização do valor e tamanhos pré-definidos do retangulo"""
         self.valor = valor
-        self.width = 100
-        self.height = 50
 
     def draw_line(self, rect, is_next, color):
         """Funcao responsavel por desenhar uma linha, caso queremos apagar
@@ -69,13 +71,13 @@ class Rect:
         # Desenha a seta que aponta para o back
         # Quando termina de desenhar a reta, cria a ponta da seta
         if not is_next:
-            line_start_back = (rect.centerx-self.width//2)
+            line_start_back = (rect.centerx-const.WIDTH_RECT//2)
             line_end_b = line_start_back - const.SPACE_RECT - const.ARROW_WIDTH
             line_end = line_start_back
 
             # Vamos posicionar a seta back
             # no quarto superior
-            position_y = rect.centery - (self.height // 4)
+            position_y = rect.centery - (const.HEIGHT_RECT // 4)
 
             while run:
                 for event in pygame.event.get():
@@ -94,13 +96,13 @@ class Rect:
                 pygame.display.update()
 
         if is_next:         
-            line_start_next = (rect.centerx +self.width//2)
+            line_start_next = (rect.centerx +const.WIDTH_RECT//2)
             line_end_n = line_start_next + const.SPACE_RECT + const.ARROW_WIDTH
             line_end = line_start_next
 
             # Vamos posicionar a seta do next
             # no quarto inferior
-            position_y = rect.centery + (self.height // 4)
+            position_y = rect.centery + (const.HEIGHT_RECT // 4)
             while run:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
@@ -138,25 +140,25 @@ class Rect:
                     if rect.y <= y:
                         run = False
                     
-                    pygame.draw.rect(WINDOW, const.WHITE, (rect.x, rect.y,
-                                                           self.width, self.height), 2)
+                    pygame.draw.rect(WINDOW, COLOR_MIDDLE, (rect.x, rect.y,
+                                                           const.WIDTH_RECT, const.HEIGHT_RECT), 2) # Apaga o retangulo para dar sensação de movimento
                     
                     rect.y -= vel
                     rect.move(rect.x, rect.y) # Usamos a função de move para mover e não bugar
                     pygame.draw.rect(WINDOW, const.BLACK, (rect.x, rect.y,
-                                                                 self.width, self.height), 2)
+                                                                 const.WIDTH_RECT, const.HEIGHT_RECT), 2)
                     
                 
                 else:
 
-                    pygame.draw.rect(WINDOW, const.WHITE, (rect.x, rect.y,
-                                                           self.width, self.height), 2)
+                    pygame.draw.rect(WINDOW, COLOR_MIDDLE, (rect.x, rect.y,
+                                                           const.WIDTH_RECT, const.HEIGHT_RECT), 2) # Apaga o retangulo para dar sensação de movimento
 
                     rect.x -= vel
                     rect.move(rect.x, rect.y)
 
                     pygame.draw.rect(WINDOW, const.BLACK, (rect.x, rect.y,
-                                                           self.width, self.height), 2)
+                                                           const.WIDTH_RECT, const.HEIGHT_RECT), 2)
                 pygame.display.update()
 
         if is_end:
@@ -167,20 +169,21 @@ class Rect:
                 if rect.x >= x:
                     if rect.y <= y:
                         run = False
-                    pygame.draw.rect(WINDOW, const.WHITE, (rect.x, rect.y,
-                                                           self.width, self.height), 2)
+                    pygame.draw.rect(WINDOW, COLOR_MIDDLE, (rect.x, rect.y,
+                                                           const.WIDTH_RECT, const.HEIGHT_RECT), 2) # Apaga o retangulo para dar sensação de movimento
 
                     rect.y -= vel
                     rect.move(rect.x, rect.y)
                     pygame.draw.rect(WINDOW, const.BLACK, (rect.x, rect.y,
-                                                                  self.width, self.height), 2)
+                                                                  const.WIDTH_RECT, const.HEIGHT_RECT), 2)
                 else:
-                    pygame.draw.rect(WINDOW, const.WHITE, (rect.x, rect.y,
-                                                           self.width, self.height), 2)
+                    
+                    pygame.draw.rect(WINDOW, COLOR_MIDDLE, (rect.x, rect.y,
+                                                           const.WIDTH_RECT, const.HEIGHT_RECT), 2)
                     rect.x += vel
                     rect.move(rect.x, rect.y)
                     pygame.draw.rect(WINDOW, const.BLACK, (rect.x, rect.y,
-                                                                  self.width, self.height), 2)
+                                                                  const.WIDTH_RECT, const.HEIGHT_RECT), 2)
                 pygame.display.update()
 
         return rect
@@ -193,12 +196,12 @@ class Rect:
             da nossa lista, vamos possicionar ele no meio da lista
             e desenhar o retangulo, salva sua imagem no no
             e depois desenhar as linhas e por fim o numero"""
-            rect_x = const.RECT_LINE_X - self.width // 2
-            rect_y = const.RECT_LINE_Y - self.height // 2 + const.CONST_Y
+            rect_x = const.RECT_LINE_X - const.WIDTH_RECT // 2
+            rect_y = const.RECT_LINE_Y - const.HEIGHT_RECT // 2 + const.CONST_Y
             
 
             rect = pygame.draw.rect(WINDOW, const.BLACK, (rect_x, rect_y,
-                                                          self.width, self.height), 2)
+                                                          const.WIDTH_RECT, const.HEIGHT_RECT), 2)
             
             pygame.display.update()
             """Armazena todos os desenhos
@@ -213,19 +216,19 @@ class Rect:
 
         elif node.next is None:
             "O spaw inicial é o mesmo que nos outros, então podemos fazer"
-            rect_x = const.RECT_LINE_X - self.width // 2
-            rect_y = (const.RECT_LINE_Y - self.height // 2) + const.CONST_Y
+            rect_x = const.RECT_LINE_X - const.WIDTH_RECT // 2
+            rect_y = (const.RECT_LINE_Y - const.HEIGHT_RECT // 2) + const.CONST_Y
 
             "Vamos agora apagar o next do ultimo elemento anterior"
-            self.draw_line(node.back.rect, 1, const.WHITE)
+            self.draw_line(node.back.rect, 1, COLOR_MIDDLE)
             "Desenhando nosso retangulo"
             rect = pygame.draw.rect(WINDOW, const.BLACK, (rect_x, rect_y,
-                                                          self.width, self.height), 2)
+                                                          const.WIDTH_RECT, const.HEIGHT_RECT), 2)
             pygame.display.update()
 
             # Vamos agora calcular a posicao x que o objeto deve ir
             # A posicao x é referente a posicao do ultimo no
-            x = (node.back.rect.x + self.width // 2) + \
+            x = (node.back.rect.x + const.WIDTH_RECT // 2) + \
                 (2 * const.SPACE_RECT) + (2 * const.ARROW_WIDTH)
             node.rect = self.move_rect(rect, x, rect_y - const.CONST_Y, 1)
             # Vamos agora desenhar o next do ultimo elemento anterior
@@ -248,18 +251,18 @@ class Rect:
             devemos apenas subir ele relativo a const_y
             Por fim renderizamos o valor no seu centro"""
 
-            rect_x = const.RECT_LINE_X - self.width // 2
-            rect_y = (const.RECT_LINE_Y - self.height // 2) + const.CONST_Y
+            rect_x = const.RECT_LINE_X - const.WIDTH_RECT // 2
+            rect_y = (const.RECT_LINE_Y - const.HEIGHT_RECT // 2) + const.CONST_Y
 
             # Envia o deseno do primeiro anterior para apgar sua linha esquerda
-            self.draw_line(node.next.rect, False, const.WHITE)
+            self.draw_line(node.next.rect, False, COLOR_MIDDLE)
             # Desenha o retangulo
             rect = pygame.draw.rect(WINDOW, const.BLACK, (rect_x, rect_y,
-                                                          self.width, self.height), 2)
+                                                          const.WIDTH_RECT, const.HEIGHT_RECT), 2)
             pygame.display.update()
 
             # Posicao x que o objeto deve ir, que é baseado onde o primeiro está
-            x = (node.next.rect.x - self.width // 2) - \
+            x = (node.next.rect.x - const.WIDTH_RECT // 2) - \
                 (2 * const.SPACE_RECT) - (2*const.ARROW_WIDTH)
             print(f'movendo o no com valor: {node.value}')
             node.rect = self.move_rect(rect, x, rect_y - const.CONST_Y, False)
@@ -385,9 +388,7 @@ class List:
 
         while aux is not None:
             """Denhamos todos nas novas posições """
-            #if aux.rect.x <= 0: # Devemos fazer isso porque quando o retangulo está fora da tela o seu tamanho tem q ser redefinido
-            #    aux.rect.width = const.WIDTH_RECT
-            
+
             pygame.draw.rect(WINDOW, const.BLACK, aux.rect, 2)
             number = GAME_FONT.render(str(aux.value), True, const.BLACK)
             WINDOW.blit(number, (aux.rect.centerx - number.get_width() // 2,
@@ -413,11 +414,8 @@ def main():
     run = True
     clock = pygame.time.Clock()
     fill_screen()
-
-    number_insert = 0
-    number_position = 0
     rectangles = List()
-    quantia = 0
+    
 
     """Botoes"""
     left_button_rect = pygame.Rect(

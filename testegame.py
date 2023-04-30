@@ -16,6 +16,7 @@ BORDER = pygame.Rect(WIDTH/2 -5, 0, 10, HEIGHT)
 # Alem disso, rotacionamos a imagem em 90 graus
 YELLOW_SPACESHIP_IMAGE = pygame.image.load(
         os.path.join('Assets', 'spaceship_yellow.png'))
+
 YELLOW_SPACESHIP = pygame.transform.rotate(pygame.transform.scale(
         YELLOW_SPACESHIP_IMAGE, (SPACESHIP_WIDTH, SPACESHIP_HEIGHT)), 90)
 
